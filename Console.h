@@ -69,6 +69,10 @@ public:
 	WindowConsole(Console* console);
 	WindowConsole(Console* console, int row, int column, int height, int width);
 
+	int& Row() { return row; }
+	int& Column() { return column; }
+	int& Width() { return width; }
+	int& Height() { return height; }
 	void SetColors(Color borderBack, Color borderFore, Color areaBack, Color areaFore);
 
 	std::string& Title();
