@@ -43,14 +43,48 @@ public:
 
         currentDirection = Direction::Right;
         nextDirection = Direction::Right;
+        DrawFood();
+    }
+
+    void ChangeDirectory()
+    {
+        currentDirection = nextDirection;
+
+        Point newHead = snake.front();
+        switch (currentDirection)
+        {
+        case Direction::Up: newHead.y--; break;
+        case Direction::Down: newHead.y++; break;
+        case Direction::Right: newHead.x++; break;
+        case Direction::Left: newHead.x--; break;
+        }
+        snake.insert(snake.begin(), newHead);
+        snake.pop_back();
     }
 
     void DrawSnake()
     {
+        system("cls");
         for (const Point& p : snake)
             gameWindow->WriteGoto(p.y, p.x, 'o');
 
         gameWindow->WriteGoto(snake.front().y, snake.front().x, '@');
+    }
+
+    bool CheckCollision()
+    {
+        Point head = snake.front();
+        if (head.x <= gameWindow->Column() || head.x >= gameWindow->Column() +
+            gameWindow->Width() - 1  || head.y <= gameWindow->Row() || 
+            head.y >= gameWindow->Row() + gameWindow->Height() - 1)
+        {
+            return true;
+        }
+
+        for (int i{ 1 }; i < snake.size(); ++i)
+            if (head == snake[i])
+                return true;
+        return false;
     }
 
     void DrawFood()
@@ -60,24 +94,44 @@ public:
 
     void Input()
     {
-        switch (_getch())
+        if (_kbhit())
         {
-        case 72: case 'w': case 'W':
-            if (currentDirection != Direction::Down)
-                nextDirection = Direction::Up;
-            break;
-        case 80: case 's': case 'S':
-            if (currentDirection != Direction::Up)
-                nextDirection = Direction::Down;
-            break;
-        case 75: case 'a': case 'A':
-            if (currentDirection != Direction::Right)
-                nextDirection = Direction::Left;
-            break;
-        case 77: case 'd': case 'D':
-            if (currentDirection != Direction::Left)
-                nextDirection = Direction::Right;
-            break;
+            switch (_getch())
+            {
+            case 72: case 'w': case 'W':
+                if (currentDirection != Direction::Down)
+                    nextDirection = Direction::Up;
+                break;
+            case 80: case 's': case 'S':
+                if (currentDirection != Direction::Up)
+                    nextDirection = Direction::Down;
+                break;
+            case 75: case 'a': case 'A':
+                if (currentDirection != Direction::Right)
+                    nextDirection = Direction::Left;
+                break;
+            case 77: case 'd': case 'D':
+                if (currentDirection != Direction::Left)
+                    nextDirection = Direction::Right;
+                break;
+            }
+        }
+    }
+
+    void Run()
+    {
+        while (!gameOver)
+        {
+            Input();
+            ChangeDirectory();
+            DrawSnake();
+            if (CheckCollision())
+            {
+                gameOver = false;
+                return;
+            }
+            DrawFood();
+            Sleep(200);
         }
     }
 };
